@@ -136,7 +136,7 @@ npm run dev
 ```env
 VITE_BACKEND_URI=http://localhost:5000/api
 ```
-
+---
 ## API EndPoint
 
 ### Authentication
@@ -152,3 +152,8 @@ VITE_BACKEND_URI=http://localhost:5000/api
 - /quiz/submit (post)
 - /quiz/result (get) <!-- only logged in user get his result on result page  -->
 
+### Room Api
+- /room/create (post)
+- /room/join/roomId (post)
+- /room/submit/roomid (post)
+---
