@@ -13,7 +13,11 @@ const userSchema = new mongoose.Schema({
     quiz: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Quiz'
-    }
+    },
+    rooms: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Room'
+    }]
 }, { timestamps: true });
 
 
