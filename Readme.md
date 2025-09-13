@@ -37,6 +37,10 @@ A full-stack Quiz Application where users can attempt quizzes, track their score
 - MongoDB with Mongoose
 - Cookie-based authentication
 - Custom error handling middleware
+- Socket.io (For Room Quiz Handling)
+- Jwt (For Secure Authentication)
+- Bcrypt (For HashPassword)
+- Cors (For Frontend Connection)
 
 ### Optional (if enabled)
 
