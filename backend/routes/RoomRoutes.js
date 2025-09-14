@@ -1,5 +1,5 @@
 const express = require('express')
-const { createRoom, joinRoom, submitAnswers, allRoom, allRoomByUser, RoomById, startQuiz, deleteRoom } = require('../controllers/RoomController')
+const { createRoom, joinRoom, submitAnswers, allRoom, allRoomByUser, RoomById, startQuiz, deleteRoom ,UpdateStatus} = require('../controllers/RoomController')
 const { verifyAccessToken } = require('../middleware/VerifyToken')
 
 const router = express.Router();
@@ -17,5 +17,6 @@ router.post('/submit/:id', verifyAccessToken, submitAnswers)
 
 // for delete call
 router.delete('/:id', verifyAccessToken, deleteRoom)
+router.put('/:id', verifyAccessToken, UpdateStatus)
 
 module.exports = router

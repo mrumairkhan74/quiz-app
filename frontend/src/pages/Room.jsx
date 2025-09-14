@@ -43,16 +43,16 @@ const Room = ({ user }) => {
   };
 
   // Join a room
-  const handleJoinRoom = async (roomId) => {
+  const handleJoinRoom = async (id) => {
     try {
       await axios.post(
-        `${apiUrl}/room/join/${roomId}`,
+        `${apiUrl}/room/join/${id}`,
         {},
         { withCredentials: true }
       );
       toast.success(`${user.name} joined successfully 🎉`, { autoClose: 1000 });
       setTimeout(() => {
-        navigate(`/roomDetail/${roomId}`);
+        navigate(`/roomDetail/${id}`);
       }, 1000);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to join room");
@@ -102,7 +102,7 @@ const Room = ({ user }) => {
       {rooms.map((r) => {
         const isJoined = r.players?.some((p) => {
           const playerId = typeof p.user === "object" ? p.user._id : p.user;
-          return playerId?.toString() === user?._id?.toString();
+          return playerId?.toString() === user?.id?.toString();
         });
 
         return (
@@ -129,16 +129,9 @@ const Room = ({ user }) => {
             </p>
 
             {isJoined ? (
-              <button className="bg-gray-400 px-3 py-2 rounded-md text-white cursor-not-allowed">
-                Joined
-              </button>
-            ) : (
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => handleJoinRoom(r._id)}
-                  className="bg-green-500 px-3 py-2 rounded-md text-white hover:bg-green-600 transition"
-                >
-                  Join Room
+                <button className="bg-gray-400 px-3 py-2 rounded-md text-white cursor-not-allowed">
+                  Joined
                 </button>
                 {user?.id === r.createdBy?._id && (
                   <button
@@ -148,6 +141,16 @@ const Room = ({ user }) => {
                     Delete Room
                   </button>
                 )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => handleJoinRoom(r._id)}
+                  className="bg-green-500 px-3 py-2 rounded-md text-white hover:bg-green-600 transition"
+                >
+                  Join Room
+                </button>
+
               </div>
             )}
           </div>

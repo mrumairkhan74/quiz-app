@@ -35,10 +35,10 @@ const roomSchema = new mongoose.Schema({
         ref: 'Quiz'
     },
     questions: [{
-        questionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz' },   // Question ID
-        questionText: String,
+        questionId: { type: mongoose.Schema.Types.ObjectId },   // Question ID
+        question: String,
         options: [String],
-        correctAnswer: String // optional: you can hide this from players
+        correctOption: String // optional: you can hide this from players
     }],
 
     status: {

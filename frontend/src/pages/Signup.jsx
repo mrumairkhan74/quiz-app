@@ -42,7 +42,7 @@ const Signup = ({ setIsLoggedIn, setUser }) => {
                         <input type="password" className='p-2 border-b-2 bg-slate-100 w-full  outline-none m-3' name="password" id="" placeholder='Enter password' value={password} onChange={(e) => setPassword(e.target.value)} />
                         <p className="w-full text-left text-sm text-slate-600">
                             I've an Account?{" "}
-                            <Link to="/login" className="text-slate-600 font-bold hover:underline">
+                            <Link to="/" className="text-slate-600 font-bold hover:underline">
                                 Login
                             </Link>
                         </p>
