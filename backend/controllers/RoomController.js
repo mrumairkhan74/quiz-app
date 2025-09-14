@@ -83,8 +83,9 @@ const joinRoom = async (req, res, next) => {
 const submitAnswers = async (req, res, next) => {
     try {
         const { roomId } = req.params;
-        const { answers } = req.body;
-        const userId = req.user?.id
+        const { answers } = req.body; // [{ quizId, answer }]
+        const userId = req.user?.id;
+
         const room = await RoomModel.findById(roomId);
         if (!room) return res.status(404).json({ message: "Room not found" });
 
@@ -92,27 +93,28 @@ const submitAnswers = async (req, res, next) => {
         let checkedAnswers = [];
 
         for (let ans of answers) {
-            const question = await QuizModel.findById(ans.quizId);
+            // find the question inside the room
+            const question = room.questions.find(q => q.questionId.toString() === ans.quizId);
+
             if (!question) continue;
 
-            const isCorrect =
-                question.correctOption?.toString().trim().toLowerCase() ===
-                ans.answer?.toString().trim().toLowerCase();
+            const isCorrect = question.correctAnswer?.trim().toLowerCase() === ans.answer?.trim().toLowerCase();
 
             if (isCorrect) score++;
 
             checkedAnswers.push({
                 quizId: ans.quizId,
                 submitted: ans.answer,
-                correct: question.correctOption,
+                correct: question.correctAnswer,
                 isCorrect
             });
         }
-        // map answers to match schema
+
         const formattedAnswers = answers.map(a => ({
             quizId: a.quizId,
             answers: a.answer
         }));
+
         // update player score in room
         const playerIndex = room.players.findIndex(p => p.user?.toString() === userId.toString());
         if (playerIndex !== -1) {
@@ -131,6 +133,7 @@ const submitAnswers = async (req, res, next) => {
             score,
             checkedAnswers
         });
+
     } catch (error) {
         next(error);
     }
