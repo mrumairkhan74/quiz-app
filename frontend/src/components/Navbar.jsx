@@ -5,7 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 
 const apiUrl = import.meta.env.VITE_BACKEND_URI;
 
-const Navbar = ({ user }) => {
+const Navbar = ({ user, setUser }) => {
     const [isOpen, setIsOpen] = useState(false);
 
 
@@ -19,6 +19,7 @@ const Navbar = ({ user }) => {
             setTimeout(() => {
                 navigate('/')
             }, 1000)
+            setUser(null)
         } catch (error) {
             console.err(error)
         }
@@ -70,6 +71,18 @@ const Navbar = ({ user }) => {
                         >
                             Result
                         </Link>
+                        <Link
+                            to="/room"
+                            className="text-xl text-white px-4 py-2 hover:bg-white hover:text-slate-500 rounded-md"
+                        >
+                            Room
+                        </Link>
+                        <Link
+                            to="/myRoom"
+                            className="text-xl text-white px-4 py-2 hover:bg-white hover:text-slate-500 rounded-md"
+                        >
+                            My Room
+                        </Link>
                     </ul>
                 </div>
 
@@ -78,7 +91,7 @@ const Navbar = ({ user }) => {
                     {user ? (
                         <div className="flex items-center gap-3">
                             <h3 className="text-xl text-white font-bold tracking-[3px]">
-                                {user.user?.name}
+                                {user?.name}
                             </h3>
                             <button onClick={handleLogout} className="bg-red-500 text-white rounded-md px-3 py-1">
                                 Logout

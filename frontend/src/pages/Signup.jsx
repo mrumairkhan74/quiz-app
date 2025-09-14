@@ -6,7 +6,7 @@ import { toast, ToastContainer } from 'react-toastify'
 
 const apiUrl = import.meta.env.VITE_BACKEND_URI
 
-const Signup = ({ setIsLoggedIn }) => {
+const Signup = ({ setIsLoggedIn, setUser }) => {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -16,7 +16,8 @@ const Signup = ({ setIsLoggedIn }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(`${apiUrl}/user/create`, { name, email, password }, { withCredentials: true })
+            const res = await axios.post(`${apiUrl}/user/create`, { name, email, password }, { withCredentials: true })
+            setUser(res.data.user);
             setIsLoggedIn(true)
             toast.success("USer created Successfully")
             setTimeout(() => {
