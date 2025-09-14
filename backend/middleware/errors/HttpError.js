@@ -40,6 +40,11 @@ class InternalServerError extends Error {
         super(500, message)
     }
 }
+class UnAuthorized extends Error {
+    constructor(message = "UnAuthorized") {
+        super(401, message)
+    }
+}
 
 
 
@@ -49,5 +54,5 @@ module.exports = {
     InternalServerError,
     BadRequestError,
     HttpError,
-    ForbiddenError
+    ForbiddenError,UnAuthorized
 }

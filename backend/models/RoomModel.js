@@ -23,7 +23,7 @@ const roomSchema = new mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Quiz'
             },
-            answers: String
+            answer: String
         }],
         completed: {
             type: Boolean,
@@ -35,7 +35,7 @@ const roomSchema = new mongoose.Schema({
         ref: 'Quiz'
     },
     questions: [{
-        questionId: { type: mongoose.Schema.Types.ObjectId },   // Question ID
+        questionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz' },   // Question ID
         questionText: String,
         options: [String],
         correctAnswer: String // optional: you can hide this from players

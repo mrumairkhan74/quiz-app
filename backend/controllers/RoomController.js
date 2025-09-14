@@ -1,6 +1,6 @@
 const QuizModel = require('../models/QuizModel')
 const RoomModel = require('../models/RoomModel')
-const { NotFoundError } = require('../middleware/errors/HttpError')
+const { NotFoundError, UnAuthorized } = require('../middleware/errors/HttpError')
 const UserModel = require('../models/UserModel');
 
 
@@ -29,9 +29,9 @@ const createRoom = async (req, res) => {
             }],
             questions: selectedQuestions.map(q => ({
                 questionId: q._id,
-                questionText: q.question,   // correct field
+                questionText: q.questions,
+                correctAnswer: q.correctAnswer,
                 options: q.options,
-                correctOption: q.correctOption  // correct field
             }))
 
         })
@@ -80,64 +80,66 @@ const joinRoom = async (req, res, next) => {
     }
 }
 
+
 const submitAnswers = async (req, res, next) => {
     try {
-        const { roomId } = req.params;
+        const userId = req.user.id;
+        const { id } = req.params; // roomId
         const { answers } = req.body; // [{ quizId, answer }]
-        const userId = req.user?.id;
 
-        const room = await RoomModel.findById(roomId);
+        const room = await RoomModel.findById(id);
         if (!room) return res.status(404).json({ message: "Room not found" });
 
         let score = 0;
-        let checkedAnswers = [];
 
+        // Check answers
         for (let ans of answers) {
-            // find the question inside the room
-            const question = room.questions.find(q => q.questionId.toString() === ans.quizId);
-
-            if (!question) continue;
-
-            const isCorrect = question.correctAnswer?.trim().toLowerCase() === ans.answer?.trim().toLowerCase();
-
-            if (isCorrect) score++;
-
-            checkedAnswers.push({
-                quizId: ans.quizId,
-                submitted: ans.answer,
-                correct: question.correctAnswer,
-                isCorrect
-            });
+            const question = room.questions.find(
+                (q) => q.questionId.toString() === ans.quizId.toString()
+            );
+            if (question && question.correctAnswer === ans.answer) {
+                score++;
+            }
         }
 
-        const formattedAnswers = answers.map(a => ({
+        const playerIndex = room.players.findIndex(
+            (p) => p.user?.toString() === userId.toString()
+        );
+
+        if (playerIndex === -1) {
+            return res
+                .status(403)
+                .json({ message: "You must join the room first" });
+        }
+
+        // Update player stats
+        const player = room.players[playerIndex];
+        player.score = score;
+        player.completed = true;
+        player.attemptNumber = (player.attemptNumber || 0) + 1;
+
+        // Save submitted answers (overwrite old ones for this attempt)
+        player.answers = answers.map((a) => ({
             quizId: a.quizId,
-            answers: a.answer
+            answer: a.answer,
         }));
-
-        // update player score in room
-        const playerIndex = room.players.findIndex(p => p.user?.toString() === userId.toString());
-        if (playerIndex !== -1) {
-            room.players[playerIndex].score = score;
-            room.players[playerIndex].completed = true;
-            room.players[playerIndex].attemptNumber += 1;
-            room.players[playerIndex].answers = formattedAnswers;
-        } else {
-            room.players.push({ user: userId, score, answers: formattedAnswers, completed: true });
-        }
 
         await room.save();
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
+            message: "Quiz submitted successfully",
             score,
-            checkedAnswers
+            room,
         });
-
     } catch (error) {
         next(error);
     }
 };
+
+
+
+
 
 
 // all Room 
@@ -198,8 +200,23 @@ const allRoomByUser = async (req, res, next) => {
 
 const RoomById = async (req, res, next) => {
     try {
+        const userId = req.user?.id
+
         const { id } = req.params;
-        const room = await RoomModel.findById(id).populate('questions', 'questionText options').populate('players.user', 'name');
+
+
+
+        const room = await RoomModel.findById(id)
+            .populate('createdBy', 'name')
+            .populate('players.user', 'name')
+
+        // check if user is in room.players
+        const isJoined = room.players.some(p => p.user?._id.toString() === userId.toString());
+        if (!isJoined) {
+            return res.status(403).json({ message: "You must join the room to view this quiz." });
+        }
+
+
         return res.status(200).json({
             success: true,
             room
@@ -221,7 +238,7 @@ const startQuiz = async (req, res, next) => {
         }
 
         // Only creator can start the quiz
-        if (room.createdBy.toString() !== userId) {
+        if (room.createdBy.toString() !== userId.toString()) {
             return res.status(403).json({ success: false, message: "Only the creator can start the quiz" });
         }
 
@@ -229,20 +246,60 @@ const startQuiz = async (req, res, next) => {
             return res.status(400).json({ success: false, message: "Quiz already started" });
         }
 
-        // Update room status to inprogress
+        // ✅ Make sure creator is also in players
+        const alreadyInPlayers = room.players.some(
+            (p) => p.user?.toString() === userId.toString()
+        );
+        if (!alreadyInPlayers) {
+            room.players.push({
+                user: userId,
+                score: 0,
+                attemptNumber: 0,
+                completed: false,
+                answers: []
+            });
+        }
+
+        // ✅ Set status to inprogress
         room.status = "inprogress";
         await room.save();
 
         return res.status(200).json({
             success: true,
             message: "Quiz started successfully",
-            room
+            room,
         });
     } catch (error) {
         next(error);
     }
 };
 
+
+
+const deleteRoom = async (req, res, next) => {
+    try {
+        const userId = req.user?.id
+        const { id } = req.params;
+        const room = await RoomModel.findById(id)
+
+        if (room.createdBy.toString() !== userId.toString()) throw new UnAuthorized("You cannot delete this room")
+
+        await RoomModel.findByIdAndDelete(id)
+
+        await UserModel.updateMany(
+            { rooms: room._id },
+            { $pull: { rooms: room._id } }
+        )
+
+        return res.status(200).json({
+            success: true,
+            message: "Room Deleted SuccessFully"
+        })
+    }
+    catch (error) {
+        next(error)
+    }
+}
 
 
 module.exports = {
@@ -252,5 +309,6 @@ module.exports = {
     allRoom,
     allRoomByUser,
     RoomById,
-    startQuiz
+    startQuiz,
+    deleteRoom
 }
