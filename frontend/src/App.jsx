@@ -10,7 +10,6 @@ import Navbar from "./components/Navbar";
 import ProtectedRoute from "./ProtectedRoute";
 import Result from "./pages/Result";
 import Room from "./pages/Room";
-import MyRoom from "./pages/myRoom";
 import CreateRoom from "./components/form/CreateRoom";
 import RoomDetail from "./pages/RoomDetails";
 
@@ -53,7 +52,6 @@ function App() {
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/result" element={<Result user={user} />} />
           <Route path="/room" element={<Room user={user} />} />
-          <Route path="/myRoom" element={<MyRoom user={user} />} />
           <Route path="/create" element={<CreateRoom />} />
           <Route path="/roomDetail/:id" element={<RoomDetail />} />
         </Route>

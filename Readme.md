@@ -140,7 +140,9 @@ npm run dev
 ```env
 VITE_BACKEND_URI=http://localhost:5000/api
 ```
+
 ---
+
 ## API EndPoint
 
 ### Authentication
@@ -151,13 +153,35 @@ VITE_BACKEND_URI=http://localhost:5000/api
 - /user/me (get)
 - /user/all (get)
 
-### Quiz 
+### Quiz
+
 - /quiz/start (get)
 - /quiz/submit (post)
 - /quiz/result (get) <!-- only logged in user get his result on result page  -->
 
 ### Room Api
-- /room/create (post)
-- /room/join/roomId (post)
-- /room/submit/roomid (post)
+
+<!-- get -->
+
+- /room/all ( all rooms )
+- /room/:id (room by id only joined user can open room)
+
+<!-- Post -->
+
+- /room/create (for create Room)
+- /room/join/:id (for join room)
+- /room/submit/:id (for submit answer & calculate answers)
+- /room/start/:id (start quiz only creator can do)
+
+<!-- delete -->
+
+- /room/:id (only creator can delete room)
+
 ---
+
+
+
+## Demo
+![Quiz Home](screenshots/home.png)
+![Quiz Page](screenshots/quiz.png)
+[Live Demo](https://your-deployment-link.com)

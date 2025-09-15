@@ -77,12 +77,6 @@ const Navbar = ({ user, setUser }) => {
                         >
                             Room
                         </Link>
-                        <Link
-                            to="/myRoom"
-                            className="text-xl text-white px-4 py-2 hover:bg-white hover:text-slate-500 rounded-md"
-                        >
-                            My Room
-                        </Link>
                     </ul>
                 </div>
 

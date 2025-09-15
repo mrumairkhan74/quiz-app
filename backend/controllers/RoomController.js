@@ -51,37 +51,45 @@ const createRoom = async (req, res) => {
 }
 
 
-
+// joinRoom
 const joinRoom = async (req, res, next) => {
     try {
-        const { id } = req.params
+        const { id } = req.params;
         const userId = req.user?.id;
 
-        const room = await RoomModel.findById(id);
-        if (!room) throw new NotFoundError("Invalid! Room Not Found")
+        const room = await RoomModel.findById(id).populate('players.user', 'name');
+        if (!room) throw new NotFoundError("Room not found");
 
-        if (room.players.some((p) => p.user?.toString() === userId)) {
-            return res.status(400).json("User Already Joined")
+        if (room.players.some(p => p.user?._id.toString() === userId)) {
+            return res.status(400).json("User already joined");
         }
 
-        room.players.push({ user: userId })
-        await room.save()
+        // Initialize player
+        const newPlayer = {
+            user: userId,
+            completed: false,
+            score: 0,
+            answers: []
+        };
+        room.players.push(newPlayer);
 
-        // also push room id in usersModel
+        await room.save();
+
+        // also push room id in user model
         await UserModel.findByIdAndUpdate(userId, {
             $push: { rooms: room._id }
-        })
+        });
 
-        return res.status(200).json(room)
+        return res.status(200).json({ room });
 
+    } catch (error) {
+        next(error);
     }
-    catch (error) {
-        next(error)
-    }
-}
+};
 
 
 
+// submit Answers and calculate score
 const submitAnswers = async (req, res, next) => {
     try {
         const userId = req.user?.id;
@@ -106,7 +114,6 @@ const submitAnswers = async (req, res, next) => {
         let score = 0;
 
         const CalculateScore = answers.map((a) => {
-            // Find the question by questionId
             const question = room.questions.find(
                 (q) => q.questionId.toString() === a.quizId.toString()
             );
@@ -127,6 +134,15 @@ const submitAnswers = async (req, res, next) => {
         player.attemptNumber = (player.attemptNumber || 0) + 1;
         player.answers = CalculateScore;
 
+
+        // ✅ Only mark room completed if all current players have submitted
+        if (room.players.every(p => p.completed)) {
+            room.status = "completed";
+        } else {
+            room.status = "inprogress"; // make sure it stays in-progress for late joiners
+        }
+
+
         await room.save();
 
         return res.status(200).json({
@@ -139,11 +155,6 @@ const submitAnswers = async (req, res, next) => {
         next(error);
     }
 };
-
-
-
-
-
 
 
 // all Room 
@@ -183,25 +194,7 @@ const allRoom = async (req, res, next) => {
     }
 };
 
-const allRoomByUser = async (req, res, next) => {
-    try {
-        const userId = req.user?.id
-
-        const rooms = await RoomModel.find({ createdBy: userId }).sort({ createdAt: -1 })
-        if (!rooms) throw new NotFoundError("No Room Available")
-
-        return res.status(200).json({
-            success: true,
-            rooms
-        })
-
-    }
-    catch (error) {
-        next(error)
-    }
-}
-
-
+// roomById
 const RoomById = async (req, res, next) => {
     try {
         const userId = req.user?.id
@@ -231,6 +224,7 @@ const RoomById = async (req, res, next) => {
     }
 }
 
+// start quiz only creator can start
 const startQuiz = async (req, res, next) => {
     try {
         const userId = req.user?.id;
@@ -279,7 +273,7 @@ const startQuiz = async (req, res, next) => {
 };
 
 
-
+// delete room only creator can delete
 const deleteRoom = async (req, res, next) => {
     try {
         const userId = req.user?.id
@@ -306,24 +300,7 @@ const deleteRoom = async (req, res, next) => {
 }
 
 
-// POST /room/finish/:id
-const UpdateStatus = async (req, res) => {
 
-    const userId = req.user.id
-    const room = await RoomModel.findById(req.params.id);
-    if (!room) return res.status(404).json({ message: 'Room not found' });
-
-    // Only creator can finish
-    if (room.createdBy.toString() !== userId.toString()) {
-        return res.status(403).json({ message: 'Only creator can finish the room' });
-    }
-
-    // Mark as finished
-    room.status = 'finished';
-    await room.save();
-
-    res.json({ message: 'Room marked as finished', room });
-};
 
 
 module.exports = {
@@ -331,9 +308,7 @@ module.exports = {
     joinRoom,
     submitAnswers,
     allRoom,
-    allRoomByUser,
     RoomById,
     startQuiz,
     deleteRoom,
-    UpdateStatus
 }
