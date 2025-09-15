@@ -210,3 +210,24 @@ VITE_BACKEND_URI=http://localhost:5000/api
 ```
 
 ---
+
+### Contribution
+```markdown
+## Contributing
+Feel free to fork this repository, make changes, and submit pull requests. Ensure backend validation and frontend state management are properly handled.
+```
+
+---
+### License
+```markdown
+## License
+MIT License
+```
+---
+
+```javascript
+//Created By
+{
+name: Umair Khan
+}
+```
