@@ -179,9 +179,34 @@ VITE_BACKEND_URI=http://localhost:5000/api
 
 ---
 
-
-
 ## Demo
+
 ![Quiz Home](screenshots/home.png)
 ![Quiz Page](screenshots/quiz.png)
 [Live Demo](https://your-deployment-link.com)
+
+---
+
+### backend Schema Model
+
+```javascript
+// UserModel
+{
+  name: String,
+  email: String,
+  password: String,
+  rooms: [ObjectId],
+  results: [ObjectId]
+}
+
+// RoomModel
+{
+  roomName: String,
+  createdBy: ObjectId,
+  players: [{ user: ObjectId, score: Number, completed: Boolean }],
+  questions: [{ questionId, question, options, correctOption }],
+  status: String // waiting | inprogress | completed
+}
+```
+
+---
