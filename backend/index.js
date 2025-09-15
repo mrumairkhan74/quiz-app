@@ -23,7 +23,7 @@ app.use('/api', Routes)
 app.use(errorHandler)
 
 
-const port = process.env.PORT || 5000
+const port = process.env.PORT
 
 
 app.listen(port, () => {
