@@ -183,7 +183,7 @@ VITE_BACKEND_URI=http://localhost:5000/api
 
 ![Quiz Home](screenshots/home.png)
 ![Quiz Page](screenshots/quiz.png)
-[Live Demo](https://your-deployment-link.com)
+[Live Demo](https://quiz-app-beta-gules.vercel.app/)
 
 ---
 
